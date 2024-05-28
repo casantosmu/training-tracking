@@ -1,0 +1,101 @@
+<h1>{{name}}</h1>
+
+{{#each workouts as |workout|}}
+  <h2>{{workout.name}} ({{workout.frequency}} days)</h2>
+
+  {{#each workout.exercises as |exercise|}}
+    <h3>{{exercise.name}} (Rest: {{exercise.minutes}} min)</h3>
+
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col" class="col-2">Date</th>
+            <th scope="col" class="col-2">Weight (Kg)</th>
+            <th scope="col" class="col-2">Sets</th>
+            <th scope="col" class="col-2">Reps</th>
+            <th scope="col" class="col-4">Performance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each exercise.trackings as |tracking|}}
+            <tr>
+              <td>{{tracking.date}}</td>
+              <td>{{tracking.weightKg}}</td>
+              <td>{{tracking.sets}}</td>
+              <td>{{tracking.repetitions}}</td>
+              <td>{{tracking.performance}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    <form action="/exercises/{{exercise.id}}/trackings" method="post">
+      <div class="row g-2">
+        <div class="col-lg-2">
+          <label for="date-{{exercise.id}}" class="visually-hidden">Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="date-{{exercise.id}}"
+            name="date"
+            value={{@root.currentDate}}
+            required
+          />
+        </div>
+        <div class="col-lg-2">
+          <label for="weight-{{exercise.id}}" class="visually-hidden">
+            Weight (Kg)
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            id="weight-{{exercise.id}}"
+            name="weightKg"
+            min="0"
+            required
+          />
+        </div>
+        <div class="col-lg-2">
+          <label for="sets-{{exercise.id}}" class="visually-hidden">Sets</label>
+          <input
+            type="number"
+            class="form-control"
+            id="sets-{{exercise.id}}"
+            name="sets"
+            min="0"
+            required
+          />
+        </div>
+        <div class="col-lg-2">
+          <label for="reps-{{exercise.id}}" class="visually-hidden">Reps</label>
+          <input
+            type="number"
+            class="form-control"
+            id="reps-{{exercise.id}}"
+            name="repetitions"
+            min="0"
+            required
+          />
+        </div>
+        <div class="col-lg-3">
+          <label
+            for="performance-{{exercise.id}}"
+            class="visually-hidden"
+          >Performance</label>
+          <input
+            type="text"
+            class="form-control"
+            id="performance-{{exercise.id}}"
+            name="performance"
+            required
+          />
+        </div>
+        <div class="col-lg-1">
+          <button type="submit" class="btn btn-primary w-100">Add</button>
+        </div>
+      </div>
+    </form>
+  {{/each}}
+{{/each}}

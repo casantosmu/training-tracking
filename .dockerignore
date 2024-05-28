@@ -1,0 +1,16 @@
+# General
+.git
+.gitignore
+.github
+.vscode
+.DS_Store
+README.md
+.env*
+
+# Node
+node_modules
+
+# Docker
+Dockerfile*
+docker-compose*.yaml
+.dockerignore

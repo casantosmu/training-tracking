@@ -1,0 +1,9 @@
+<h1>Routines</h1>
+
+<nav>
+  <ul>
+    {{#each routines as |routine|}}
+      <li><a href="routines/{{routine.id}}">{{routine.name}}</a></li>
+    {{/each}}
+  </ul>
+</nav>
