@@ -1,4 +1,4 @@
-FROM node:20.13.1-bookworm-slim AS base
+FROM node:22.2.0-bookworm-slim AS base
 
 FROM base AS build
 RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
