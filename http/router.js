@@ -98,7 +98,7 @@ router.get(
         workouts: routine.workouts.map(
           ({ name, weeklyFrequencyMin, weeklyFrequencyMax, exercises }) => {
             let frequency;
-            if (weeklyFrequencyMin !== weeklyFrequencyMax) {
+            if (weeklyFrequencyMin === weeklyFrequencyMax) {
               frequency = weeklyFrequencyMin;
             } else {
               frequency = `${weeklyFrequencyMin}-${weeklyFrequencyMax}`;
