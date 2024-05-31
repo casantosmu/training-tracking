@@ -9,7 +9,7 @@ export const router = Router();
 router.get("/", async (req, res, next) => {
   try {
     const result = await sql`SELECT routine_id as id, name FROM routines;`;
-    res.render("home", { routines: result.rows });
+    res.render("pages/home", { routines: result.rows });
   } catch (error) {
     next(error);
   }
@@ -32,60 +32,59 @@ router.get(
       const { id } = req.params;
 
       const result = await sql`
-          WITH trackings_agg AS (
-            SELECT
-              exercise_id,
-              json_agg(
-                json_build_object(
-                  'date', date,
-                  'weightKg', weight_kg,
-                  'sets', sets,
-                  'repetitions', repetitions,
-                  'performance', performance
-                )
-              ) trackings
-              FROM trackings
-              GROUP BY exercise_id
-          ),
-          exercises_agg AS (
-            SELECT
-              workout_id,
-              json_agg(
-                json_build_object(
-                  'id', exercise_id,
-                  'name', name,
-                  'restSecondsMin', rest_seconds_min,
-                  'restSecondsMax', rest_seconds_min,
-                  'trackings', trackings
-                )
-              ) exercises
-              FROM exercises
-              LEFT JOIN trackings_agg USING (exercise_id)
-              GROUP BY workout_id
-          ),
-          workouts_agg AS (
-            SELECT
-              routine_id,
-              json_agg(
-                json_build_object(
-                  'name', name,
-                  'weeklyFrequencyMin', weekly_frequency_min,
-                  'weeklyFrequencyMax', weekly_frequency_max,
-                  'exercises', exercises
-                )
-              ) workouts
-              FROM workouts
-              LEFT JOIN exercises_agg USING (workout_id)
-              GROUP BY routine_id 
-          )
+        WITH trackings_agg AS (
           SELECT
-            name,
-            workouts
-          FROM routines
-          LEFT JOIN workouts_agg USING (routine_id)
-          WHERE routine_id = ${id}
-          LIMIT 1;
-        `;
+            exercise_id,
+            json_agg(
+              json_build_object(
+                'date', date,
+                'weightKg', weight_kg,
+                'sets', sets,
+                'repetitions', repetitions,
+                'performance', performance
+              )
+            ) trackings
+            FROM trackings
+            GROUP BY exercise_id
+        ),
+        exercises_agg AS (
+          SELECT
+            workout_id,
+            json_agg(
+              json_build_object(
+                'id', exercise_id,
+                'name', name,
+                'restSecondsMin', rest_seconds_min,
+                'restSecondsMax', rest_seconds_min,
+                'trackings', COALESCE(trackings, '[]')
+              )
+            ) exercises
+            FROM exercises
+            LEFT JOIN trackings_agg USING (exercise_id)
+            GROUP BY workout_id
+        ),
+        workouts_agg AS (
+          SELECT
+            routine_id,
+            json_agg(
+              json_build_object(
+                'name', name,
+                'weeklyFrequencyMin', weekly_frequency_min,
+                'weeklyFrequencyMax', weekly_frequency_max,
+                'exercises', COALESCE(exercises, '[]')
+              )
+            ) workouts
+            FROM workouts
+            LEFT JOIN exercises_agg USING (workout_id)
+            GROUP BY routine_id 
+        )
+        SELECT
+          name,
+          COALESCE(workouts, '[]') workouts
+        FROM routines
+        LEFT JOIN workouts_agg USING (routine_id)
+        WHERE routine_id = ${id};
+      `;
 
       const routine = result.rows[0];
 
@@ -93,7 +92,7 @@ router.get(
         throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
       }
 
-      res.render("routines", {
+      res.render("pages/routine", {
         name: routine.name,
         workouts: routine.workouts.map(
           ({ name, weeklyFrequencyMin, weeklyFrequencyMax, exercises }) => {
