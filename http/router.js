@@ -9,7 +9,7 @@ export const router = Router();
 router.get("/", async (req, res, next) => {
   try {
     const result = await sql`SELECT routine_id as id, name FROM routines;`;
-    res.render("home", { routines: result.rows });
+    res.render("pages/home", { routines: result.rows });
   } catch (error) {
     next(error);
   }
@@ -92,7 +92,7 @@ router.get(
         throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
       }
 
-      res.render("routines", {
+      res.render("pages/routine", {
         name: routine.name,
         workouts: routine.workouts.map(
           ({ name, weeklyFrequencyMin, weeklyFrequencyMax, exercises }) => {
