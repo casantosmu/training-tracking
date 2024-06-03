@@ -4,12 +4,16 @@ import { validate } from "./middlewares/validate.js";
 import { HttpError } from "./http-error.js";
 import { HTTP_STATUS } from "./http-status.js";
 
+const USER_ID = 1;
+
 export const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const result = await sql`SELECT routine_id as id, name FROM routines;`;
-    res.render("pages/home", { routines: result.rows });
+    const result = await sql`
+      SELECT routine_id as id, name FROM routines WHERE user_id = ${USER_ID};
+    `;
+    res.render("pages/routines", { routines: result.rows });
   } catch (error) {
     next(error);
   }
@@ -69,8 +73,7 @@ router.get(
             json_agg(
               json_build_object(
                 'name', name,
-                'weeklyFrequencyMin', weekly_frequency_min,
-                'weeklyFrequencyMax', weekly_frequency_max,
+                'days', days,
                 'exercises', COALESCE(exercises, '[]')
               )
             ) workouts
@@ -80,6 +83,7 @@ router.get(
         )
         SELECT
           name,
+          user_id "userId",
           COALESCE(workouts, '[]') workouts
         FROM routines
         LEFT JOIN workouts_agg USING (routine_id)
@@ -92,35 +96,33 @@ router.get(
         throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
       }
 
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
       res.render("pages/routine", {
         name: routine.name,
-        workouts: routine.workouts.map(
-          ({ name, weeklyFrequencyMin, weeklyFrequencyMax, exercises }) => {
-            let frequency;
-            if (weeklyFrequencyMin === weeklyFrequencyMax) {
-              frequency = weeklyFrequencyMin;
-            } else {
-              frequency = `${weeklyFrequencyMin}-${weeklyFrequencyMax}`;
-            }
+        workouts: routine.workouts.map(({ name, days, exercises }) => {
+          return {
+            name,
+            days,
+            exercises: exercises.map(
+              ({ id, name, restSecondsMin, restSecondsMax, trackings }) => {
+                let minutes;
+                if (restSecondsMin === restSecondsMax) {
+                  minutes = restSecondsMin / 60;
+                } else {
+                  minutes = `${restSecondsMin / 60}-${restSecondsMax / 60}`;
+                }
 
-            return {
-              name,
-              frequency,
-              exercises: exercises.map(
-                ({ id, name, restSecondsMin, restSecondsMax, trackings }) => {
-                  let minutes;
-                  if (restSecondsMin === restSecondsMax) {
-                    minutes = restSecondsMin / 60;
-                  } else {
-                    minutes = `${restSecondsMin / 60}-${restSecondsMax / 60}`;
-                  }
-
-                  return { id, name, minutes, trackings };
-                },
-              ),
-            };
-          },
-        ),
+                return { id, name, minutes, trackings };
+              },
+            ),
+          };
+        }),
         currentDate: new Date().toISOString().split("T")[0],
       });
     } catch (error) {
@@ -160,9 +162,11 @@ router.post(
 
       const result = await sql`
         SELECT
-          routine_id as "routineId"
+          user_id "userId",
+          routine_id "routineId"
         FROM exercises
         INNER JOIN workouts USING (workout_id)
+        INNER JOIN routines USING (routine_id)
         WHERE exercise_id = ${id}
         LIMIT 1
       `;
@@ -171,6 +175,13 @@ router.post(
 
       if (!exercise) {
         throw new HttpError(HTTP_STATUS.NOT_FOUND, `Exercise ${id} not found`);
+      }
+
+      if (exercise.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+        );
       }
 
       await sql`

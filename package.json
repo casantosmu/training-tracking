@@ -3,7 +3,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node --watch --env-file=.env . | pino-pretty",
+    "dev": "node --watch --env-file=.env --inspect . | pino-pretty",
     "db:migrate": "node --env-file=.env db/migrations/init.js",
     "db:seed": "node --env-file=.env db/seeds/init.js",
     "format": "prettier . --write && eslint . --fix",

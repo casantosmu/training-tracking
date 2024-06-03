@@ -28,16 +28,16 @@ VALUES
     (3, 'Cardio and Strength');
 
 -- Insert data into the workouts table
-INSERT INTO workouts (routine_id, name, weekly_frequency_min, weekly_frequency_max)
+INSERT INTO workouts (routine_id, name, days)
 VALUES
-    (1, 'Full body', 2, 3),
-    (2, 'Upper body', 2, 3),
-    (2, 'Lower body', 2, 3),
-    (3, 'Push', 2, 3),
-    (3, 'Pull', 2, 3),
-    (3, 'Legs', 2, 3),
-    (4, 'Cardio', 3, 5),
-    (4, 'Strength', 2, 4);
+    (1, 'Full body', 2),
+    (2, 'Upper body', 2),
+    (2, 'Lower body', 2),
+    (3, 'Push', 2),
+    (3, 'Pull', 2),
+    (3, 'Legs', 2),
+    (4, 'Cardio', 3),
+    (4, 'Strength', 2);
 
 -- Insert data into the exercises table
 INSERT INTO exercises (workout_id, name, sets_min, sets_max, repetitions_min, repetitions_max, rest_seconds_min, rest_seconds_max)
