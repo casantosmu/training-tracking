@@ -13,7 +13,7 @@ router.get("/", async (req, res, next) => {
     const result = await sql`
       SELECT routine_id as id, name FROM routines WHERE user_id = ${USER_ID};
     `;
-    res.render("pages/home", { routines: result.rows });
+    res.render("pages/routines", { routines: result.rows });
   } catch (error) {
     next(error);
   }
