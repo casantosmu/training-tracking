@@ -23,7 +23,7 @@ CREATE TABLE users (
 -- Routines Table
 CREATE TABLE routines (
     routine_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(user_id),
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -31,7 +31,7 @@ CREATE TABLE routines (
 -- Workouts Table
 CREATE TABLE workouts (
     workout_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    routine_id INT NOT NULL REFERENCES routines(routine_id),
+    routine_id INT NOT NULL REFERENCES routines(routine_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     weekly_frequency_min INT NOT NULL CHECK (weekly_frequency_min >= 1),
     weekly_frequency_max INT NOT NULL CHECK (weekly_frequency_max >= weekly_frequency_min),
@@ -41,7 +41,7 @@ CREATE TABLE workouts (
 -- Exercises Table
 CREATE TABLE exercises (
     exercise_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    workout_id INT NOT NULL REFERENCES workouts(workout_id),
+    workout_id INT NOT NULL REFERENCES workouts(workout_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     sets_min INT NOT NULL CHECK (sets_min >= 1),
     sets_max INT NOT NULL CHECK (sets_max >= sets_min),
@@ -55,7 +55,7 @@ CREATE TABLE exercises (
 -- Trackings Table
 CREATE TABLE trackings (
     tracking_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    exercise_id INT NOT NULL REFERENCES exercises(exercise_id),
+    exercise_id INT NOT NULL REFERENCES exercises(exercise_id) ON DELETE CASCADE,
     date DATE NOT NULL,
     weight_kg INT NOT NULL CHECK (weight_kg >= 0),
     sets INT NOT NULL CHECK (sets >= 0),
