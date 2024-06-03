@@ -33,8 +33,7 @@ CREATE TABLE workouts (
     workout_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     routine_id INT NOT NULL REFERENCES routines(routine_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    weekly_frequency_min INT NOT NULL CHECK (weekly_frequency_min >= 1),
-    weekly_frequency_max INT NOT NULL CHECK (weekly_frequency_max >= weekly_frequency_min),
+    days INT NOT NULL CHECK (days >= 1 AND days <= 7),
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

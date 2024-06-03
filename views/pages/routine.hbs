@@ -1,7 +1,7 @@
 <h1>{{name}}</h1>
 
 {{#each workouts as |workout|}}
-  <h2>{{workout.name}} ({{workout.frequency}} days)</h2>
+  <h2>{{workout.name}} ({{workout.days}} days)</h2>
 
   {{#each workout.exercises as |exercise|}}
     <h3>{{exercise.name}} (Rest: {{exercise.minutes}} min)</h3>

@@ -73,8 +73,7 @@ router.get(
             json_agg(
               json_build_object(
                 'name', name,
-                'weeklyFrequencyMin', weekly_frequency_min,
-                'weeklyFrequencyMax', weekly_frequency_max,
+                'days', days,
                 'exercises', COALESCE(exercises, '[]')
               )
             ) workouts
@@ -106,33 +105,24 @@ router.get(
 
       res.render("pages/routine", {
         name: routine.name,
-        workouts: routine.workouts.map(
-          ({ name, weeklyFrequencyMin, weeklyFrequencyMax, exercises }) => {
-            let frequency;
-            if (weeklyFrequencyMin === weeklyFrequencyMax) {
-              frequency = weeklyFrequencyMin;
-            } else {
-              frequency = `${weeklyFrequencyMin}-${weeklyFrequencyMax}`;
-            }
+        workouts: routine.workouts.map(({ name, days, exercises }) => {
+          return {
+            name,
+            days,
+            exercises: exercises.map(
+              ({ id, name, restSecondsMin, restSecondsMax, trackings }) => {
+                let minutes;
+                if (restSecondsMin === restSecondsMax) {
+                  minutes = restSecondsMin / 60;
+                } else {
+                  minutes = `${restSecondsMin / 60}-${restSecondsMax / 60}`;
+                }
 
-            return {
-              name,
-              frequency,
-              exercises: exercises.map(
-                ({ id, name, restSecondsMin, restSecondsMax, trackings }) => {
-                  let minutes;
-                  if (restSecondsMin === restSecondsMax) {
-                    minutes = restSecondsMin / 60;
-                  } else {
-                    minutes = `${restSecondsMin / 60}-${restSecondsMax / 60}`;
-                  }
-
-                  return { id, name, minutes, trackings };
-                },
-              ),
-            };
-          },
-        ),
+                return { id, name, minutes, trackings };
+              },
+            ),
+          };
+        }),
         currentDate: new Date().toISOString().split("T")[0],
       });
     } catch (error) {
