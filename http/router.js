@@ -173,6 +173,130 @@ router.get(
   },
 );
 
+router.get(
+  "/routines/:id/edit",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        WITH workouts_agg AS (
+          SELECT
+            routine_id,
+            json_agg(
+              json_build_object(
+                'id', workout_id,
+                'name', name
+              )
+            ) workouts
+            FROM workouts
+            GROUP BY routine_id 
+        )
+        SELECT
+          routine_id id,
+          name,
+          user_id "userId",
+          COALESCE(workouts, '[]') workouts
+        FROM routines
+        LEFT JOIN workouts_agg USING (routine_id)
+        WHERE routine_id = ${id}
+        LIMIT 1;
+      `;
+
+      const routine = result.rows[0];
+
+      if (!routine) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
+      }
+
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
+      res.render("pages/routine-edit", {
+        id: routine.id,
+        name: routine.name,
+        workouts: routine.workouts,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.put(
+  "/routines/:id",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+    body: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+      },
+      required: ["name"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+
+      const result = await sql`
+        SELECT
+          user_id "userId"
+        FROM routines
+        WHERE routine_id = ${id}
+        LIMIT 1;
+      `;
+
+      const routine = result.rows[0];
+
+      if (!routine) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
+      }
+
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
+      await sql`
+        UPDATE routines
+        SET
+          name = ${name}
+        WHERE routine_id = ${id};
+      `;
+
+      res.redirect(`/routines/${id}`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.post(
   "/exercises/:id/trackings",
   validate({
