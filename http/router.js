@@ -297,6 +297,52 @@ router.put(
   },
 );
 
+router.delete(
+  "/routines/:id",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        SELECT
+          user_id AS "userId"
+        FROM routines
+        WHERE routine_id = ${id}
+        LIMIT 1;
+      `;
+
+      const routine = result.rows[0];
+
+      if (!routine) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
+      }
+
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
+      await sql`DELETE FROM routines WHERE routine_id = ${id};`;
+
+      res.redirect(`/`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.post(
   "/exercises/:id/trackings",
   validate({

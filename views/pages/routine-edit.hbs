@@ -6,6 +6,14 @@
       <li class="breadcrumb-item active" aria-current="page">Edit</li>
     </ol>
   </nav>
+  <button
+    type="button"
+    class="btn btn-danger"
+    data-bs-toggle="modal"
+    data-bs-target="#deleteModal"
+  >
+    Delete
+  </button>
 </div>
 
 <h1>Edit</h1>
@@ -42,4 +50,38 @@
   {{/each}}
 </ul>
 
-<a href="/routines/{{id}}/workouts/create" class="btn btn-success">Add</a>
+<a href="/routines/{{id}}/workouts/create" class="btn btn-success">Add Workout</a>
+
+<div
+  class="modal fade"
+  id="deleteModal"
+  tabindex="-1"
+  aria-labelledby="deleteModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="deleteModalLabel">Confirm Delete</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this routine?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form action="/routines/{{id}}" method="post">
+          <input type="hidden" name="_method" value="DELETE" />
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
