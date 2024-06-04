@@ -1,9 +1,13 @@
 <h1>Routines</h1>
 
-<nav>
-  <ul>
-    {{#each routines as |routine|}}
-      <li><a href="routines/{{routine.id}}">{{routine.name}}</a></li>
-    {{/each}}
-  </ul>
-</nav>
+{{#if routines}}
+  <nav>
+    <ul>
+      {{#each routines as |routine|}}
+        <li><a href="routines/{{routine.id}}">{{routine.name}}</a></li>
+      {{/each}}
+    </ul>
+  </nav>
+{{else}}
+  <p>Looks like you haven't created any routines yet.</p>
+{{/if}}
