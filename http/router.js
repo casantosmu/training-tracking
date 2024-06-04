@@ -72,6 +72,7 @@ router.get(
             routine_id,
             json_agg(
               json_build_object(
+                'id', workout_id,
                 'name', name,
                 'days', days,
                 'exercises', COALESCE(exercises, '[]')
@@ -82,6 +83,7 @@ router.get(
             GROUP BY routine_id 
         )
         SELECT
+          routine_id id,
           name,
           user_id "userId",
           COALESCE(workouts, '[]') workouts
@@ -104,9 +106,11 @@ router.get(
       }
 
       res.render("pages/routine", {
+        id: routine.id,
         name: routine.name,
-        workouts: routine.workouts.map(({ name, days, exercises }) => {
+        workouts: routine.workouts.map(({ id, name, days, exercises }) => {
           return {
+            id,
             name,
             days,
             exercises: exercises.map(

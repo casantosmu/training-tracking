@@ -1,3 +1,12 @@
+<div class="d-flex justify-content-between">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Routines</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{name}}</li>
+    </ol>
+  </nav>
+</div>
+
 <h1>{{name}}</h1>
 
 {{#each workouts as |workout|}}
@@ -40,7 +49,7 @@
             class="form-control"
             id="date-{{exercise.id}}"
             name="date"
-            value={{@root.currentDate}}
+            value="{{@root.currentDate}}"
             required
           />
         </div>
@@ -80,10 +89,9 @@
           />
         </div>
         <div class="col-lg-3">
-          <label
-            for="performance-{{exercise.id}}"
-            class="visually-hidden"
-          >Performance</label>
+          <label for="performance-{{exercise.id}}" class="visually-hidden">
+            Performance
+          </label>
           <input
             type="text"
             class="form-control"
@@ -97,5 +105,17 @@
         </div>
       </div>
     </form>
+  {{else}}
+    <p>This workout currently has no exercises. Add your first exercise to get
+      started!</p>
+    <a
+      href="/routines/{{@root.id}}/workouts/{{workout.id}}/edit"
+      class="btn btn-primary"
+    >
+      Add exercise
+    </a>
   {{/each}}
+{{else}}
+  <p>This routine is currently empty. Add your first workout to get started!</p>
+  <a href="/routines/{{id}}/edit" class="btn btn-primary">Add workout</a>
 {{/each}}
