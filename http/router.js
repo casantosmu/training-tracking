@@ -19,6 +19,43 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.get("/routines/create", async (req, res, next) => {
+  try {
+    res.render("pages/routine-create");
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post(
+  "/routines",
+  validate({
+    body: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+      },
+      required: ["name"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { name } = req.body;
+
+      const insert = await sql`
+        INSERT INTO routines (user_id, name) VALUES (${USER_ID}, ${name}) RETURNING routine_id AS id;
+      `;
+
+      const { id } = insert.rows[0];
+
+      res.redirect(`/routines/${id}/edit`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.get(
   "/routines/:id",
   validate({
@@ -89,7 +126,8 @@ router.get(
           COALESCE(workouts, '[]') workouts
         FROM routines
         LEFT JOIN workouts_agg USING (routine_id)
-        WHERE routine_id = ${id};
+        WHERE routine_id = ${id}
+        LIMIT 1;
       `;
 
       const routine = result.rows[0];
@@ -172,7 +210,7 @@ router.post(
         INNER JOIN workouts USING (workout_id)
         INNER JOIN routines USING (routine_id)
         WHERE exercise_id = ${id}
-        LIMIT 1
+        LIMIT 1;
       `;
 
       const exercise = result.rows[0];

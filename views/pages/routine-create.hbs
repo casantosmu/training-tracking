@@ -1,0 +1,25 @@
+<div class="d-flex justify-content-between">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Routines</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Create</li>
+    </ol>
+  </nav>
+</div>
+
+<h1>Create Routine</h1>
+
+<form action="/routines/{{id}}" method="post">
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input
+      type="text"
+      class="form-control"
+      id="name"
+      name="name"
+      placeholder="Enter routine name"
+      required
+    />
+  </div>
+  <button type="submit" class="btn btn-primary">Create Routine</button>
+</form>

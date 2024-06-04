@@ -1,13 +1,23 @@
-<h1>Routines</h1>
+<div class="d-flex justify-content-between">
+  <h1>Routines</h1>
+  <div>
+    <a href="/routines/create" class="btn btn-success">Add Routine</a>
+  </div>
+</div>
 
 {{#if routines}}
   <nav>
-    <ul>
+    <ul class="list-group">
       {{#each routines as |routine|}}
-        <li><a href="routines/{{routine.id}}">{{routine.name}}</a></li>
+        <li class="list-group-item">
+          <a href="/routines/{{routine.id}}" class="text-decoration-none">
+            {{routine.name}}
+          </a>
+        </li>
       {{/each}}
     </ul>
   </nav>
 {{else}}
-  <p>Looks like you haven't created any routines yet.</p>
+  <p>It looks like you haven't created any routines yet. Click "Add Routine" to
+    get started.</p>
 {{/if}}
