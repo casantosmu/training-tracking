@@ -466,6 +466,54 @@ router.put(
   },
 );
 
+router.delete(
+  "/workouts/:id",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        SELECT
+          routine_id "routineId",
+          user_id "userId"
+        FROM workouts
+        INNER JOIN routines USING (routine_id)
+        WHERE workout_id = ${id}
+        LIMIT 1;
+      `;
+
+      const workout = result.rows[0];
+
+      if (!workout) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Workout ${id} not found`);
+      }
+
+      if (workout.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+        );
+      }
+
+      await sql`DELETE FROM workouts WHERE workout_id = ${id};`;
+
+      res.redirect(`/routines/${workout.routineId}`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.get(
   "/routines/:id/workouts/create",
   validate({
