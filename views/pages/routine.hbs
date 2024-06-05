@@ -111,10 +111,7 @@
   {{else}}
     <p>This workout currently has no exercises. Add your first exercise to get
       started!</p>
-    <a
-      href="/routines/{{@root.id}}/workouts/{{workout.id}}/edit"
-      class="btn btn-primary"
-    >
+    <a href="/workouts/{{workout.id}}/edit" class="btn btn-primary">
       Add exercise
     </a>
   {{/each}}

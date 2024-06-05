@@ -343,6 +343,114 @@ router.delete(
   },
 );
 
+router.get(
+  "/routines/:id/workouts/create",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        SELECT
+          routine_id id,
+          name,
+          user_id "userId"
+        FROM routines
+        WHERE routine_id = ${id}
+        LIMIT 1;
+      `;
+
+      const routine = result.rows[0];
+
+      if (!routine) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
+      }
+
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
+      res.render("pages/workout-create", { routine });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  "/routines/:id/workouts",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+    body: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        days: { type: "integer", minimum: 1, maximum: 7 },
+      },
+      required: ["name", "days"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { name, days } = req.body;
+
+      const result = await sql`
+        SELECT
+          user_id "userId"
+        FROM routines
+        WHERE routine_id = ${id}
+        LIMIT 1;
+      `;
+
+      const routine = result.rows[0];
+
+      if (!routine) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
+      }
+
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
+      const insert = await sql`
+        INSERT INTO workouts (routine_id, name, days)
+        VALUES (${id}, ${name}, ${days})
+        RETURNING workout_id AS id;
+      `;
+
+      const workout = insert.rows[0];
+
+      res.redirect(`/workouts/${workout.id}/edit`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.post(
   "/exercises/:id/trackings",
   validate({
