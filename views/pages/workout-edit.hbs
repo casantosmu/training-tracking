@@ -1,9 +1,13 @@
 <div class="d-flex justify-content-between">
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/">Routines</a></li>
-      <li class="breadcrumb-item"><a href="/routines/{{id}}">{{name}}</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Edit</li>
+      <li class="breadcrumb-item"> <a href="/">Routines</a></li>
+      <li class="breadcrumb-item">
+        <a href="/routines/{{routine.id}}">{{routine.name}}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {{name}}
+      </li>
     </ol>
   </nav>
   <button
@@ -18,7 +22,7 @@
 
 <h1>Edit</h1>
 
-<form action="/routines/{{id}}" method="post">
+<form action="/workouts/{{id}}" method="post">
   <input type="hidden" name="_method" value="PUT" />
   <div class="mb-3">
     <label for="name" class="form-label">Name</label>
@@ -28,31 +32,27 @@
       id="name"
       name="name"
       value="{{name}}"
-      placeholder="Enter routine name"
+      placeholder="Enter workout name"
+      required
+    />
+  </div>
+  <div class="mb-3">
+    <label for="days" class="form-label">
+      Days
+    </label>
+    <input
+      type="number"
+      class="form-control"
+      id="days"
+      name="days"
+      value="{{days}}"
+      min="1"
+      max="7"
       required
     />
   </div>
   <button type="submit" class="btn btn-primary">Save</button>
 </form>
-
-<h2>Workouts</h2>
-
-<ul class="list-group mb-3">
-  {{#each workouts as |workout|}}
-    <li
-      class="list-group-item d-flex justify-content-between align-items-center"
-    >
-      {{workout.name}}
-      (Days:
-      {{workout.days}})
-      <a href="/workouts/{{workout.id}}/edit" class="btn btn-sm btn-secondary">
-        Edit
-      </a>
-    </li>
-  {{/each}}
-</ul>
-
-<a href="/routines/{{id}}/workouts/create" class="btn btn-success">Add Workout</a>
 
 <div
   class="modal fade"
@@ -73,13 +73,13 @@
         ></button>
       </div>
       <div class="modal-body">
-        Are you sure you want to delete this routine?
+        Are you sure you want to delete this workout?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
           Cancel
         </button>
-        <form action="/routines/{{id}}" method="post">
+        <form action="/workouts/{{id}}" method="post">
           <input type="hidden" name="_method" value="DELETE" />
           <button type="submit" class="btn btn-danger">Delete</button>
         </form>

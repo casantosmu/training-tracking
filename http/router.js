@@ -196,7 +196,8 @@ router.get(
             json_agg(
               json_build_object(
                 'id', workout_id,
-                'name', name
+                'name', name,
+                'days', days
               )
             ) workouts
             FROM workouts
@@ -337,6 +338,284 @@ router.delete(
       await sql`DELETE FROM routines WHERE routine_id = ${id};`;
 
       res.redirect(`/`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/workouts/:id/edit",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        WITH routine_json AS (
+          SELECT
+            routine_id,
+            json_build_object(
+              'id', routine_id,
+              'name', name,
+              'userId', user_id
+            ) routine
+            FROM routines
+        )
+        SELECT
+          workout_id id,
+          name,
+          days,
+          routine
+        FROM workouts
+        INNER JOIN routine_json USING (routine_id)
+        WHERE workout_id = ${id}
+        LIMIT 1;
+      `;
+
+      const workout = result.rows[0];
+
+      if (!workout) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Workout ${id} not found`);
+      }
+
+      if (workout.routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+        );
+      }
+
+      res.render("pages/workout-edit", workout);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.put(
+  "/workouts/:id",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+    body: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        days: { type: "integer", minimum: 1, maximum: 7 },
+      },
+      required: ["name", "days"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { name, days } = req.body;
+
+      const result = await sql`
+        SELECT
+          routine_id "routineId",
+          user_id "userId"
+        FROM workouts
+        INNER JOIN routines USING (routine_id)
+        WHERE workout_id = ${id}
+        LIMIT 1;
+      `;
+
+      const workout = result.rows[0];
+
+      if (!workout) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Workout ${id} not found`);
+      }
+
+      if (workout.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+        );
+      }
+
+      await sql`
+        UPDATE workouts
+        SET
+          name = ${name},
+          days = ${days}
+        WHERE workout_id = ${id};
+      `;
+
+      res.redirect(`/routines/${workout.routineId}/edit`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.delete(
+  "/workouts/:id",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        SELECT
+          routine_id "routineId",
+          user_id "userId"
+        FROM workouts
+        INNER JOIN routines USING (routine_id)
+        WHERE workout_id = ${id}
+        LIMIT 1;
+      `;
+
+      const workout = result.rows[0];
+
+      if (!workout) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Workout ${id} not found`);
+      }
+
+      if (workout.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+        );
+      }
+
+      await sql`DELETE FROM workouts WHERE workout_id = ${id};`;
+
+      res.redirect(`/routines/${workout.routineId}`);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/routines/:id/workouts/create",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        SELECT
+          routine_id id,
+          name,
+          user_id "userId"
+        FROM routines
+        WHERE routine_id = ${id}
+        LIMIT 1;
+      `;
+
+      const routine = result.rows[0];
+
+      if (!routine) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
+      }
+
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
+      res.render("pages/workout-create", { routine });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  "/routines/:id/workouts",
+  validate({
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+    body: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        days: { type: "integer", minimum: 1, maximum: 7 },
+      },
+      required: ["name", "days"],
+      additionalProperties: false,
+    },
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { name, days } = req.body;
+
+      const result = await sql`
+        SELECT
+          user_id "userId"
+        FROM routines
+        WHERE routine_id = ${id}
+        LIMIT 1;
+      `;
+
+      const routine = result.rows[0];
+
+      if (!routine) {
+        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
+      }
+
+      if (routine.userId !== USER_ID) {
+        throw new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
+        );
+      }
+
+      const insert = await sql`
+        INSERT INTO workouts (routine_id, name, days)
+        VALUES (${id}, ${name}, ${days})
+        RETURNING workout_id AS id;
+      `;
+
+      const workout = insert.rows[0];
+
+      res.redirect(`/workouts/${workout.id}/edit`);
     } catch (error) {
       next(error);
     }
