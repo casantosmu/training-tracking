@@ -19,14 +19,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/routines/create", async (req, res, next) => {
-  try {
-    res.render("pages/routine-create");
-  } catch (error) {
-    next(error);
-  }
-});
-
 router.post(
   "/routines",
   validate({
@@ -508,52 +500,6 @@ router.delete(
       await sql`DELETE FROM workouts WHERE workout_id = ${id};`;
 
       res.redirect(`/routines/${workout.routineId}`);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-router.get(
-  "/routines/:id/workouts/create",
-  validate({
-    params: {
-      type: "object",
-      properties: {
-        id: { type: "integer" },
-      },
-      required: ["id"],
-      additionalProperties: false,
-    },
-  }),
-  async (req, res, next) => {
-    try {
-      const { id } = req.params;
-
-      const result = await sql`
-        SELECT
-          routine_id id,
-          name,
-          user_id "userId"
-        FROM routines
-        WHERE routine_id = ${id}
-        LIMIT 1;
-      `;
-
-      const routine = result.rows[0];
-
-      if (!routine) {
-        throw new HttpError(HTTP_STATUS.NOT_FOUND, `Routine ${id} not found`);
-      }
-
-      if (routine.userId !== USER_ID) {
-        throw new HttpError(
-          HTTP_STATUS.NOT_FOUND,
-          `User ${USER_ID} does not have permission to access routine ${id}.`,
-        );
-      }
-
-      res.render("pages/workout-create", { routine });
     } catch (error) {
       next(error);
     }
