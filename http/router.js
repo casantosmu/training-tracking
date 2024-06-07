@@ -499,7 +499,7 @@ router.delete(
 
       await sql`DELETE FROM workouts WHERE workout_id = ${id};`;
 
-      res.redirect(`/routines/${workout.routineId}`);
+      res.redirect(`/routines/${workout.routineId}/edit`);
     } catch (error) {
       next(error);
     }
@@ -553,15 +553,13 @@ router.post(
         );
       }
 
-      const insert = await sql`
+      await sql`
         INSERT INTO workouts (routine_id, name, days)
         VALUES (${id}, ${name}, ${days})
         RETURNING workout_id AS id;
       `;
 
-      const workout = insert.rows[0];
-
-      res.redirect(`/workouts/${workout.id}/edit`);
+      res.redirect(`/routines/${id}/edit`);
     } catch (error) {
       next(error);
     }
