@@ -23,7 +23,7 @@ CREATE TABLE users (
 -- Routines Table
 CREATE TABLE routines (
     routine_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users ON DELETE CASCADE,
     name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -31,7 +31,7 @@ CREATE TABLE routines (
 -- Workouts Table
 CREATE TABLE workouts (
     workout_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    routine_id INT NOT NULL REFERENCES routines(routine_id) ON DELETE CASCADE,
+    routine_id INT NOT NULL REFERENCES routines ON DELETE CASCADE,
     name TEXT NOT NULL,
     days INT NOT NULL CHECK (days >= 1 AND days <= 7),
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -40,21 +40,24 @@ CREATE TABLE workouts (
 -- Exercises Table
 CREATE TABLE exercises (
     exercise_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    workout_id INT NOT NULL REFERENCES workouts(workout_id) ON DELETE CASCADE,
+    workout_id INT NOT NULL REFERENCES workouts ON DELETE CASCADE,
     name TEXT NOT NULL,
     sets_min INT NOT NULL CHECK (sets_min >= 1),
-    sets_max INT NOT NULL CHECK (sets_max >= sets_min),
+    sets_max INT NOT NULL CHECK (sets_max >= 1),
     repetitions_min INT NOT NULL CHECK (repetitions_min >= 1),
-    repetitions_max INT NOT NULL CHECK (repetitions_max >= repetitions_min),
+    repetitions_max INT NOT NULL CHECK (repetitions_max >= 1),
     rest_seconds_min INT NOT NULL CHECK (rest_seconds_min >= 0),
-    rest_seconds_max INT NOT NULL CHECK (rest_seconds_max >= rest_seconds_min),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    rest_seconds_max INT NOT NULL CHECK (rest_seconds_max >= 0),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CHECK (sets_max >= sets_min),
+    CHECK (repetitions_max >= repetitions_min),
+    CHECK (rest_seconds_max >= rest_seconds_min)
 );
 
 -- Trackings Table
 CREATE TABLE trackings (
     tracking_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    exercise_id INT NOT NULL REFERENCES exercises(exercise_id) ON DELETE CASCADE,
+    exercise_id INT NOT NULL REFERENCES exercises ON DELETE CASCADE,
     date DATE NOT NULL,
     weight_kg INT NOT NULL CHECK (weight_kg >= 0),
     sets INT NOT NULL CHECK (sets >= 0),
