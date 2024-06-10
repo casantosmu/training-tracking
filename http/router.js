@@ -11,7 +11,7 @@ export const router = Router();
 router.get("/", async (req, res, next) => {
   try {
     const result = await sql`
-      SELECT routine_id as id, name FROM routines WHERE user_id = ${USER_ID};
+      SELECT routine_id AS id, name FROM routines WHERE user_id = ${USER_ID};
     `;
     res.render("pages/routines", { routines: result.rows });
   } catch (error) {
@@ -76,7 +76,7 @@ router.get(
                 'repetitions', repetitions,
                 'performance', performance
               )
-            ) trackings
+            ) AS trackings
             FROM trackings
             GROUP BY exercise_id
         ),
@@ -91,7 +91,7 @@ router.get(
                 'restSecondsMax', rest_seconds_min,
                 'trackings', COALESCE(trackings, '[]')
               )
-            ) exercises
+            ) AS exercises
             FROM exercises
             LEFT JOIN trackings_agg USING (exercise_id)
             GROUP BY workout_id
@@ -106,16 +106,16 @@ router.get(
                 'days', days,
                 'exercises', COALESCE(exercises, '[]')
               )
-            ) workouts
+            ) AS workouts
             FROM workouts
             LEFT JOIN exercises_agg USING (workout_id)
             GROUP BY routine_id 
         )
         SELECT
-          routine_id id,
+          routine_id AS id,
           name,
           user_id "userId",
-          COALESCE(workouts, '[]') workouts
+          COALESCE(workouts, '[]') AS workouts
         FROM routines
         LEFT JOIN workouts_agg USING (routine_id)
         WHERE routine_id = ${id}
@@ -191,15 +191,15 @@ router.get(
                 'name', name,
                 'days', days
               )
-            ) workouts
+            ) AS workouts
             FROM workouts
             GROUP BY routine_id 
         )
         SELECT
-          routine_id id,
+          routine_id AS id,
           name,
           user_id "userId",
-          COALESCE(workouts, '[]') workouts
+          COALESCE(workouts, '[]') AS workouts
         FROM routines
         LEFT JOIN workouts_agg USING (routine_id)
         WHERE routine_id = ${id}
@@ -308,7 +308,7 @@ router.delete(
 
       const result = await sql`
         SELECT
-          user_id AS "userId"
+          user_id "userId"
         FROM routines
         WHERE routine_id = ${id}
         LIMIT 1;
@@ -360,11 +360,11 @@ router.get(
               'id', routine_id,
               'name', name,
               'userId', user_id
-            ) routine
+            ) AS routine
             FROM routines
         )
         SELECT
-          workout_id id,
+          workout_id AS id,
           name,
           days,
           routine
