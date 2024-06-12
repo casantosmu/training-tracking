@@ -28,6 +28,8 @@ CREATE TABLE routines (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE INDEX idx_routines_user_id ON routines (user_id);
+
 -- Workouts Table
 CREATE TABLE workouts (
     workout_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -36,6 +38,8 @@ CREATE TABLE workouts (
     days INT NOT NULL CHECK (days >= 1 AND days <= 7),
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX idx_workouts_routine_id ON workouts (routine_id);
 
 -- Exercises Table
 CREATE TABLE exercises (
@@ -54,6 +58,8 @@ CREATE TABLE exercises (
     CHECK (rest_seconds_max >= rest_seconds_min)
 );
 
+CREATE INDEX idx_exercises_workout_id ON exercises (workout_id);
+
 -- Trackings Table
 CREATE TABLE trackings (
     tracking_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -65,6 +71,8 @@ CREATE TABLE trackings (
     performance TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX idx_trackings_exercise_id ON trackings (exercise_id);
 `);
 
 console.log('migration "init" was executed successfully');
