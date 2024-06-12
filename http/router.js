@@ -88,7 +88,7 @@ router.get(
                 'id', exercise_id,
                 'name', name,
                 'restSecondsMin', rest_seconds_min,
-                'restSecondsMax', rest_seconds_min,
+                'restSecondsMax', rest_seconds_max,
                 'trackings', COALESCE(trackings, '[]')
               )
             ) AS exercises
@@ -383,7 +383,7 @@ router.get(
       if (workout.routine.userId !== USER_ID) {
         throw new HttpError(
           HTTP_STATUS.NOT_FOUND,
-          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
         );
       }
 
@@ -439,7 +439,7 @@ router.put(
       if (workout.userId !== USER_ID) {
         throw new HttpError(
           HTTP_STATUS.NOT_FOUND,
-          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
         );
       }
 
@@ -493,7 +493,7 @@ router.delete(
       if (workout.userId !== USER_ID) {
         throw new HttpError(
           HTTP_STATUS.NOT_FOUND,
-          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
         );
       }
 
@@ -615,7 +615,7 @@ router.post(
       if (exercise.userId !== USER_ID) {
         throw new HttpError(
           HTTP_STATUS.NOT_FOUND,
-          `User ${USER_ID} does not have permission to access exercise ${id}.`,
+          `User ${USER_ID} does not have permission to access routine ${id}.`,
         );
       }
 
