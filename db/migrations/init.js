@@ -17,7 +17,7 @@ CREATE TABLE users (
     user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Routines Table
@@ -25,7 +25,7 @@ CREATE TABLE routines (
     routine_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users ON DELETE CASCADE,
     name TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_routines_user_id ON routines (user_id);
@@ -36,7 +36,7 @@ CREATE TABLE workouts (
     routine_id INT NOT NULL REFERENCES routines ON DELETE CASCADE,
     name TEXT NOT NULL,
     days INT NOT NULL CHECK (days >= 1 AND days <= 7),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_workouts_routine_id ON workouts (routine_id);
@@ -52,7 +52,7 @@ CREATE TABLE exercises (
     repetitions_max INT NOT NULL CHECK (repetitions_max >= 1),
     rest_seconds_min INT NOT NULL CHECK (rest_seconds_min >= 0),
     rest_seconds_max INT NOT NULL CHECK (rest_seconds_max >= 0),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CHECK (sets_max >= sets_min),
     CHECK (repetitions_max >= repetitions_min),
     CHECK (rest_seconds_max >= rest_seconds_min)
@@ -69,7 +69,7 @@ CREATE TABLE trackings (
     sets INT NOT NULL CHECK (sets >= 0),
     repetitions INT NOT NULL CHECK (repetitions >= 0),
     performance TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_trackings_exercise_id ON trackings (exercise_id);
