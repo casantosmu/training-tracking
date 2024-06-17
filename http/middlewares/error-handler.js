@@ -8,12 +8,12 @@ export const errorHandler = (error, req, res, next) => {
   const statusCode = error.statusCode ?? HTTP_STATUS.INTERNAL_SERVER_ERROR;
 
   const logLevel = statusCode >= 500 ? "error" : "warn";
-  logger[logLevel](error.message, error);
+  logger[logLevel]("Error handler", error);
 
   res.sendStatus(statusCode);
 
-  const isExpectedError = error instanceof HttpError;
-  if (!isExpectedError) {
-    events.emit(EVENT_NAMES.SYSTEM.SHUTDOWN);
+  const isUnexpectedError = !(error instanceof HttpError);
+  if (isUnexpectedError) {
+    events.emit(EVENT_NAMES.SYSTEM_SHUTDOWN, error);
   }
 };
