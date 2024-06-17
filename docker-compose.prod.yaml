@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=5001
+      - POSTGRES_HOST=/var/run/postgresql
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=training_tracking
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=training_tracking
+    ports:
+      - 5001:5001
+    user: 1001:1001
+    volumes:
+      - /var/run/postgresql:/var/run/postgresql
